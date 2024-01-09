@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "solo",
+    "name": "Solo",
     "slug": "solo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.demdevvy.solo"
     },
     "android": {
       "adaptiveIcon": {

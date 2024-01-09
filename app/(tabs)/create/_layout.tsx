@@ -42,7 +42,7 @@ const CreateLayout = () => {
     return (
         <CapturedVideoContext.Provider value={{ capturedVideo, setCapturedVideo }}>
             <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" key="ass" />
+                <Stack.Screen name="index" />
                 <Stack.Screen name="upload" options={{
                     headerShown: true,
                     headerShadowVisible: true,

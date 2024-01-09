@@ -1,16 +1,18 @@
-import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image, TextInput } from "react-native";
-import { useRouter } from "expo-router";
-import { Feather } from "@expo/vector-icons";
-import { createUserWithEmailAndPassword, linkWithPhoneNumber, updateProfile, RecaptchaVerifier } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../firebaseConfig";
-import { hasMessageKey } from "../../util";
+import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, doc, setDoc } from "firebase/firestore";
 import { globalStyles } from "../../constants";
+import { Feather } from "@expo/vector-icons";
+import { hasMessageKey } from "../../util";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
 const SignUp = () => {
     const soloLogo = require('../../assets/images/TypoGraphicaSolo.png');
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
     const [password, setPassword] = useState('');
     const [passwordVerification, setPasswordVerification] = useState('');
     const [passwordShown, setPasswordShown] = useState(false);
@@ -19,7 +21,19 @@ const SignUp = () => {
         try {
             if (password !== passwordVerification) throw new Error('Passwords do not match');
             const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-            console.log(`User ${username} created!`);
+            const user = userCredential.user;
+            await setDoc(doc(FIREBASE_DB, 'users', user.uid), {
+                email,
+                username,
+                fullName,
+                profilePicture: 'https://i.kym-cdn.com/entries/icons/original/000/023/419/nerd_smoking.JPG',
+                notificationCount: 0,
+                followerCount: 0,
+                followingCount: 0,
+                postCount: 0,
+                bio: ''
+            });
+            console.log('User successfully created');
         } catch (e) {
             if (hasMessageKey(e)) console.log(`Sign up error: ${e.message}`);
         }
@@ -32,6 +46,13 @@ const SignUp = () => {
                     onChangeText={text => setEmail(text)}
                     value={email}
                     placeholder="Email"
+                    placeholderTextColor="#acadad"
+                    style={styles.input}
+                />
+                <TextInput
+                    onChangeText={text => setFullName(text)}
+                    value={fullName}
+                    placeholder="Full Name"
                     placeholderTextColor="#acadad"
                     style={styles.input}
                 />
