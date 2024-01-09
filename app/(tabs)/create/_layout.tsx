@@ -3,8 +3,8 @@ import { Stack, useRouter } from "expo-router";
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useState } from "react";
 import { Keyboard, Pressable, StyleSheet } from "react-native";
 import { globalStyles } from "../../../constants";
-import { useKeyboard } from '@react-native-community/hooks'
 import { Text } from "react-native";
+
 const CapturedVideoContext = createContext<{
     capturedVideo: { uri: string } | undefined,
     setCapturedVideo: Dispatch<SetStateAction<{ uri: string } | undefined>>
@@ -42,7 +42,7 @@ const CreateLayout = () => {
     return (
         <CapturedVideoContext.Provider value={{ capturedVideo, setCapturedVideo }}>
             <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
+                <Stack.Screen name="index" key="ass" />
                 <Stack.Screen name="upload" options={{
                     headerShown: true,
                     headerShadowVisible: true,

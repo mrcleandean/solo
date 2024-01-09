@@ -9,14 +9,23 @@ import { globalStyles } from "../../../constants";
 import { Video, ResizeMode } from "expo-av";
 import { useRef, useState } from "react";
 import { router } from "expo-router";
+import { convertLocalUriToBlob } from "../../../util";
 
 const Upload = () => {
-    const { capturedVideo, setCapturedVideo } = useCapturedVideoContext();
     const videoRef = useRef<Video>(null);
+    const { capturedVideo, setCapturedVideo } = useCapturedVideoContext();
     const [durationMillis, setDurationMillis] = useState(0);
     const [image, setImage] = useState<string | null>(null);
     const [caption, setCaption] = useState('');
     const captionLengthLimit = 250;
+
+    const restoreDefaults = () => {
+        setCapturedVideo(undefined);
+        setDurationMillis(0);
+        setImage(null);
+        setCaption('');
+        router.replace('/(tabs)/create');
+    }
 
     const generateThumbnail = async (position = 0) => {
         if (!capturedVideo) {
@@ -32,37 +41,21 @@ const Upload = () => {
         }
     };
 
-    const typingCaption = (text: string) => {
-        if (text[text.length - 1] !== '\n') {
-            setCaption(text);
-        }
-    }
-
     const share = async () => {
         Keyboard.dismiss();
         if (!image || !capturedVideo) return;
         try {
-            const blob = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    resolve(xhr.response);
-                };
-                xhr.onerror = function (e) {
-                    console.log(e);
-                    reject(new TypeError('Network Request Failed'));
-                };
-                xhr.responseType = 'blob';
-                xhr.open('GET', capturedVideo.uri, true);
-                xhr.send(null);
-            });
+            const blob = await convertLocalUriToBlob(capturedVideo.uri);
             const storageRef = ref(FIREBASE_STORAGE, `videos/${Date.now()}`);
-            const uploadResult = await uploadBytes(storageRef, blob as Blob);
-
+            await uploadBytes(storageRef, blob as Blob);
+            // if uploaded, then restoreDefaults() resets everyhing
+            restoreDefaults();
             router.replace('/(tabs)/profile');
         } catch (e) {
             console.log(e);
         }
     }
+
     return (
         <KeyboardAvoidingView
             style={[styles.parentWrapper, {
@@ -109,7 +102,11 @@ const Upload = () => {
                     style={styles.captionInput}
                     inputMode="text"
                     value={caption}
-                    onChangeText={typingCaption}
+                    onChangeText={text => {
+                        if (text[text.length - 1] !== '\n') {
+                            setCaption(text);
+                        }
+                    }}
                     onKeyPress={({ nativeEvent }) => {
                         if (nativeEvent.key === 'Enter') {
                             Keyboard.dismiss();
