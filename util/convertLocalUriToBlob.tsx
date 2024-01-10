@@ -1,4 +1,4 @@
-const convertLocalUriToBlob = (uri: string) => {
+const convertLocalUriToBlob = (uri: string): Promise<Blob | TypeError> => {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {

@@ -1,18 +1,18 @@
 import { View, StyleSheet, Text, KeyboardAvoidingView, Dimensions, Keyboard } from "react-native"
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
-import { FIREBASE_STORAGE } from "../../../firebaseConfig";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useCapturedVideoContext } from './_layout';
-import { ref, uploadBytes } from "firebase/storage";
 import { globalStyles } from "../../../constants";
 import { Video, ResizeMode } from "expo-av";
 import { useRef, useState } from "react";
 import { router } from "expo-router";
-import { convertLocalUriToBlob } from "../../../util";
+import { addObjectMetadata, convertLocalUriToBlob, hasMessageKey, uploadObject } from "../../../util";
+import { useUserContext } from "../../_layout";
 
 const Upload = () => {
     const videoRef = useRef<Video>(null);
+    const { userAuth } = useUserContext();
     const { capturedVideo, setCapturedVideo } = useCapturedVideoContext();
     const [durationMillis, setDurationMillis] = useState(0);
     const [image, setImage] = useState<string | null>(null);
@@ -27,12 +27,7 @@ const Upload = () => {
         router.replace('/tabs/create');
     }
 
-    const generateThumbnail = async (position = 0) => {
-        if (!capturedVideo) {
-            router.replace('/tabs/create');
-            setCapturedVideo(undefined);
-            return;
-        }
+    const generateThumbnail = async (capturedVideo: { uri: string }, position = 0) => {
         try {
             const { uri } = await VideoThumbnails.getThumbnailAsync(capturedVideo.uri, { time: Math.floor(position) * 1000 });
             setImage(uri);
@@ -41,17 +36,26 @@ const Upload = () => {
         }
     };
 
-    const share = async () => {
+    const shareVideo = async () => {
         Keyboard.dismiss();
-        if (!image || !capturedVideo) return;
+        if (!image || !capturedVideo || userAuth === null || userAuth === 'initial') return;
         try {
-            const blob = await convertLocalUriToBlob(capturedVideo.uri);
-            const storageRef = ref(FIREBASE_STORAGE, `videos/${Date.now()}`);
-            await uploadBytes(storageRef, blob as Blob);
+            const imageBlob = await convertLocalUriToBlob(image);
+            if (imageBlob instanceof TypeError) throw new Error('Could not convert image to blob');
+            const videoBlob = await convertLocalUriToBlob(capturedVideo.uri);
+            if (videoBlob instanceof TypeError) throw new Error('Could not convert video to blob');
+
+            const imageUrl = await uploadObject(imageBlob, userAuth.uid);
+            const videoUrl = await uploadObject(videoBlob, userAuth.uid);
+
+            await addObjectMetadata(userAuth.uid, imageUrl, 'images');
+            await addObjectMetadata(userAuth.uid, videoUrl, 'videos');
+
             restoreDefaults();
             router.replace('/tabs/profile');
         } catch (e) {
-            console.log(e);
+            if (hasMessageKey(e)) console.log(e.message);
+            else console.log('Unknown error in share()');
         }
     }
 
@@ -76,7 +80,12 @@ const Upload = () => {
                     ref={videoRef}
                     progressUpdateIntervalMillis={10}
                     onLoad={(status) => {
-                        generateThumbnail();
+                        if (capturedVideo === undefined) {
+                            restoreDefaults();
+                            router.replace('/tabs/create');
+                            return;
+                        }
+                        generateThumbnail(capturedVideo, 0);
                         if (status.isLoaded && status.durationMillis) {
                             setDurationMillis(status.durationMillis)
                         }
@@ -152,7 +161,7 @@ const Upload = () => {
                 <TouchableOpacity style={[styles.submissionButton, { backgroundColor: 'white', width: Dimensions.get('window').width / 2 - 25 }]}>
                     <Text style={[styles.submissionText, { color: 'black' }]}>Save Draft</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={share} style={[styles.submissionButton, { backgroundColor: globalStyles.summission.backgroundColor, width: Dimensions.get('window').width / 2 - 25, }]}>
+                <TouchableOpacity onPress={shareVideo} style={[styles.submissionButton, { backgroundColor: globalStyles.summission.backgroundColor, width: Dimensions.get('window').width / 2 - 25, }]}>
                     <Text style={[styles.submissionText, { color: 'white' }]}>Share</Text>
                 </TouchableOpacity>
             </View>
