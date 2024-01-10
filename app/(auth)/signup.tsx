@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image, TextInput } from "react-native";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { globalStyles } from "../../constants";
 import { Feather } from "@expo/vector-icons";
 import { hasMessageKey } from "../../util";

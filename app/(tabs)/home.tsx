@@ -5,9 +5,6 @@ import { type AVPlaybackSource } from 'expo-av';
 import { usePathname } from 'expo-router';
 import { Short } from '../../components';
 import { globalStyles } from '../../constants';
-import { ref } from 'firebase/storage';
-import { FIREBASE_STORAGE } from '../../firebaseConfig';
-import { getDownloadURL } from 'firebase/storage';
 
 const Feed = () => {
     const pathname = usePathname();

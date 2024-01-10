@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable, Keyboard } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { globalStyles } from "../../constants"
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { ScrollView, TextInput } from "react-native-gesture-handler"
 import { useEffect, useState } from "react"
 

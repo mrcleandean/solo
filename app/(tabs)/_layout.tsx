@@ -1,13 +1,18 @@
 import { Ionicons, FontAwesome5, FontAwesome, Feather, AntDesign } from '@expo/vector-icons';
-import { Tabs } from "expo-router"
+import { Tabs, router, usePathname } from "expo-router"
 import { globalStyles } from '../../constants';
 import { Pressable, StyleSheet } from 'react-native';
 import { useUserContext } from '../_layout';
 
 const TabsLayout = () => {
     const { userDoc } = useUserContext();
+    const pathname = usePathname();
     const profileBackPressed = () => {
-
+        if (pathname === '/profile/settings' && router.canGoBack()) router.back();
+        else router.replace('/(tabs)/home')
+    }
+    const profileSettingsPressed = () => {
+        router.push('/profile/settings');
     }
     return (
         <Tabs
@@ -25,11 +30,23 @@ const TabsLayout = () => {
                 options={{
                     tabBarIcon: () => <FontAwesome name="film" size={23} color='white' />
                 }}
+                listeners={{
+                    tabPress: () => {
+                        if (pathname === '/home') return;
+                        router.replace('/(tabs)/home');
+                    }
+                }}
             />
             <Tabs.Screen
                 name="discover"
                 options={{
                     tabBarIcon: () => <Feather name="search" size={24} color='white' />
+                }}
+                listeners={{
+                    tabPress: () => {
+                        if (pathname === '/discover') return;
+                        router.replace('/(tabs)/discover');
+                    }
                 }}
             />
             <Tabs.Screen
@@ -37,11 +54,23 @@ const TabsLayout = () => {
                 options={{
                     tabBarIcon: () => <FontAwesome5 name="plus-square" size={24} color='white' />
                 }}
+                listeners={{
+                    tabPress: () => {
+                        if (pathname === '/create') return;
+                        router.replace('/(tabs)/create');
+                    }
+                }}
             />
             <Tabs.Screen
                 name="inbox"
                 options={{
                     tabBarIcon: () => <Ionicons name="md-chatbox-outline" size={24} color="white" />
+                }}
+                listeners={{
+                    tabPress: () => {
+                        if (pathname === '/inbox') return;
+                        router.replace('/(tabs)/inbox');
+                    }
                 }}
             />
             <Tabs.Screen
@@ -59,26 +88,46 @@ const TabsLayout = () => {
                     },
                     headerTitle: userDoc?.username || 'Unavailable',
                     headerLeft: () => (
-                        <Pressable onPress={profileBackPressed} style={styles.headerLeftPressable}>
-                            <AntDesign name="left" size={25} color="black" style={styles.headerLeftSymbol} />
+                        <Pressable onPress={profileBackPressed} style={[styles.headerPressable, { marginLeft: headerSymbolMargin }]}>
+                            <AntDesign name="left" size={25} color="white" style={styles.headerLeftSymbol} />
                         </Pressable>
                     ),
-                    tabBarIcon: () => <FontAwesome5 name="user" size={22} color='white' />
+                    headerRight: () => (
+                        <Pressable onPress={profileSettingsPressed} style={[styles.headerPressable, { marginRight: headerSymbolMargin }]}>
+                            <FontAwesome name="gear" size={25} color="white" />
+                        </Pressable>
+                    ),
+                    tabBarIcon: () => <FontAwesome5 name="user" size={22} color='white' />,
+                }}
+                listeners={{
+                    tabPress: () => {
+                        if (pathname === '/profile') return;
+                        if (pathname === '/profile/settings' && router.canGoBack()) {
+                            router.back();
+                            return;
+                        }
+                        router.replace('/profile')
+                    }
                 }}
             />
         </Tabs>
     )
 }
 
+const headerSymbolMargin = 10;
+
 const styles = StyleSheet.create({
-    headerLeftPressable: {
-        backgroundColor: 'white',
+    headerPressable: {
+        width: 30,
+        height: 30,
         borderRadius: 50,
         padding: 1.5,
-        marginLeft: 10
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     headerLeftSymbol: {
-        transform: [{ translateX: -2 }]
+        transform: [{ translateX: -1 }]
     },
 })
 
