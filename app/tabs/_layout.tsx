@@ -8,11 +8,11 @@ const TabsLayout = () => {
     const { userDoc } = useUserContext();
     const pathname = usePathname();
     const profileBackPressed = () => {
-        if (pathname === '/profile/settings' && router.canGoBack()) router.back();
-        else router.replace('/(tabs)/home')
+        if (pathname === '/tabs/profile/settings' && router.canGoBack()) router.back();
+        else router.replace('/tabs')
     }
     const profileSettingsPressed = () => {
-        router.push('/profile/settings');
+        router.push('/tabs/profile/settings');
     }
     return (
         <Tabs
@@ -26,14 +26,14 @@ const TabsLayout = () => {
             }}
         >
             <Tabs.Screen
-                name="home"
+                name="index"
                 options={{
                     tabBarIcon: () => <FontAwesome name="film" size={23} color='white' />
                 }}
                 listeners={{
                     tabPress: () => {
-                        if (pathname === '/home') return;
-                        router.replace('/(tabs)/home');
+                        if (pathname === '/tabs') return;
+                        router.replace('/tabs');
                     }
                 }}
             />
@@ -44,8 +44,8 @@ const TabsLayout = () => {
                 }}
                 listeners={{
                     tabPress: () => {
-                        if (pathname === '/discover') return;
-                        router.replace('/(tabs)/discover');
+                        if (pathname === '/tabs/discover') return;
+                        router.replace('/tabs/discover');
                     }
                 }}
             />
@@ -56,8 +56,8 @@ const TabsLayout = () => {
                 }}
                 listeners={{
                     tabPress: () => {
-                        if (pathname === '/create') return;
-                        router.replace('/(tabs)/create');
+                        if (pathname === '/tabs/create') return;
+                        router.replace('/tabs/create');
                     }
                 }}
             />
@@ -68,8 +68,8 @@ const TabsLayout = () => {
                 }}
                 listeners={{
                     tabPress: () => {
-                        if (pathname === '/inbox') return;
-                        router.replace('/(tabs)/inbox');
+                        if (pathname === '/tabs/inbox') return;
+                        router.replace('/tabs/inbox');
                     }
                 }}
             />
@@ -92,21 +92,24 @@ const TabsLayout = () => {
                             <AntDesign name="left" size={25} color="white" style={styles.headerLeftSymbol} />
                         </Pressable>
                     ),
-                    headerRight: () => (
-                        <Pressable onPress={profileSettingsPressed} style={[styles.headerPressable, { marginRight: headerSymbolMargin }]}>
-                            <FontAwesome name="gear" size={25} color="white" />
-                        </Pressable>
-                    ),
+                    headerRight: () => {
+                        if (pathname === '/tabs/profile/settings') return;
+                        return (
+                            <Pressable onPress={profileSettingsPressed} style={[styles.headerPressable, { marginRight: headerSymbolMargin }]}>
+                                <FontAwesome name="gear" size={25} color="white" />
+                            </Pressable>
+                        )
+                    },
                     tabBarIcon: () => <FontAwesome5 name="user" size={22} color='white' />,
                 }}
                 listeners={{
                     tabPress: () => {
-                        if (pathname === '/profile') return;
-                        if (pathname === '/profile/settings' && router.canGoBack()) {
+                        if (pathname === '/tabs/profile') return;
+                        if (pathname === '/tabs/profile/settings' && router.canGoBack()) {
                             router.back();
                             return;
                         }
-                        router.replace('/profile')
+                        router.replace('/tabs/profile')
                     }
                 }}
             />

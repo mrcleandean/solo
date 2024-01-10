@@ -24,12 +24,12 @@ const Upload = () => {
         setDurationMillis(0);
         setImage(null);
         setCaption('');
-        router.replace('/(tabs)/create');
+        router.replace('/tabs/create');
     }
 
     const generateThumbnail = async (position = 0) => {
         if (!capturedVideo) {
-            router.replace('/(tabs)/create');
+            router.replace('/tabs/create');
             setCapturedVideo(undefined);
             return;
         }
@@ -48,9 +48,8 @@ const Upload = () => {
             const blob = await convertLocalUriToBlob(capturedVideo.uri);
             const storageRef = ref(FIREBASE_STORAGE, `videos/${Date.now()}`);
             await uploadBytes(storageRef, blob as Blob);
-            // if uploaded, then restoreDefaults() resets everyhing
             restoreDefaults();
-            router.replace('/(tabs)/profile');
+            router.replace('/tabs/profile');
         } catch (e) {
             console.log(e);
         }

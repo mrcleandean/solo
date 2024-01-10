@@ -65,11 +65,11 @@ const RootLayout = () => {
                     if (hasMessageKey(e)) console.log(e.message);
                 }
             })();
-            router.replace('/(tabs)/home');
+            router.replace('/tabs');
             return;
         }
 
-        router.replace('/(auth)/login');
+        router.replace('/auth');
     }, [userAuth]);
 
     return (

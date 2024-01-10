@@ -8,10 +8,6 @@ import { globalStyles } from '../../constants';
 
 const Feed = () => {
     const pathname = usePathname();
-    //gs://solo-services.appspot.com/videos/1704761266818
-    //gs://solo-services.appspot.com/videos/1704761403242
-    // const v1Ref = ref(FIREBASE_STORAGE, 'videos/1704761266818');
-    // const v2Ref = ref(FIREBASE_STORAGE, 'videos/1704761403242');
     const [array, setArray] = useState<AVPlaybackSource[]>([]);
 
     const [viewableItemIndex, setViewableItemIndex] = useState<number | null>(null);
@@ -23,7 +19,7 @@ const Feed = () => {
     }, []);
 
     useEffect(() => {
-        setTabActive(pathname === '/home');
+        setTabActive(pathname === '/tabs');
     }, [pathname]);
 
     useEffect(() => {

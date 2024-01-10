@@ -18,7 +18,7 @@ const Settings = () => {
     }
     return (
         <View style={styles.parentWrapper}>
-            <Link href='/(tabs)/profile/settings/deactivate-account-modal'>
+            <Link href='/tabs/profile/settings/deactivate-account-modal'>
                 <TouchableOpacity style={styles.warningButton}>
                     <Text style={{
                         color: 'white'
@@ -28,7 +28,7 @@ const Settings = () => {
                     <AntDesign name="delete" size={22} color="white" />
                 </TouchableOpacity>
             </Link>
-            <Link href='/(tabs)/profile/settings/delete-account-modal'>
+            <Link href='/tabs/profile/settings/delete-account-modal'>
                 <TouchableOpacity style={styles.warningButton}>
                     <Text style={{
                         color: 'white'

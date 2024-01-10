@@ -6,7 +6,7 @@ const InitialLoading = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.brokeText}>Something broke...</Text>
-            <Link style={styles.linkText} href="/(tabs)/home">Return Home</Link>
+            <Link style={styles.linkText} href="/tabs">Return Home</Link>
         </View>
     )
 }

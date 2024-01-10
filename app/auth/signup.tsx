@@ -1,43 +1,66 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image, ActivityIndicator, TextInput } from "react-native";
-import { AntDesign, Feather } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import { hasMessageKey } from "../../util";
-import { FIREBASE_AUTH } from "../../firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image, TextInput } from "react-native";
+import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import { globalStyles } from "../../constants";
+import { Feather } from "@expo/vector-icons";
+import { hasMessageKey } from "../../util";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 
-const Login = () => {
+const SignUp = () => {
     const soloLogo = require('../../assets/images/TypoGraphicaSolo.png');
-    const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [loggingIn, setLoggingIn] = useState<boolean>(false);
-    const [passwordShown, setPasswordShown] = useState<boolean>(false);
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordVerification, setPasswordVerification] = useState('');
+    const [passwordShown, setPasswordShown] = useState(false);
     const router = useRouter();
-    const tryLogin = async () => {
+    const trySignUp = async () => {
         try {
-            setLoggingIn(true);
-            const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, username, password);
-            if (userCredential) {
-                console.log('Log in successful');
-                setLoggingIn(false);
-            } else throw new Error('Could not find an account with those credentials.');
+            if (password !== passwordVerification) throw new Error('Passwords do not match');
+            const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+            const user = userCredential.user;
+            await setDoc(doc(FIREBASE_DB, 'users', user.uid), {
+                email,
+                username,
+                fullName,
+                profilePicture: 'https://i.kym-cdn.com/entries/icons/original/000/023/419/nerd_smoking.JPG',
+                notificationCount: 0,
+                followerCount: 0,
+                followingCount: 0,
+                postCount: 0,
+                bio: ''
+            });
+            console.log('User successfully created');
         } catch (e) {
-            setLoggingIn(false);
-
-            if (hasMessageKey(e)) console.log(`Log in error: ${e.message}`);
+            if (hasMessageKey(e)) console.log(`Sign up error: ${e.message}`);
         }
     }
     return (
         <View style={styles.parent}>
-            <View style={[styles.section, { flex: 9 }]}>
-                <Image source={soloLogo} style={{ transform: [{ scale: 0.45 }] }} />
+            <View style={[styles.section, { flex: 8 }]}>
+                <Image source={soloLogo} style={{ transform: [{ scale: 0.4 }], marginBottom: -30 }} />
+                <TextInput
+                    onChangeText={text => setEmail(text)}
+                    value={email}
+                    placeholder="Email"
+                    placeholderTextColor="#acadad"
+                    style={styles.input}
+                />
+                <TextInput
+                    onChangeText={text => setFullName(text)}
+                    value={fullName}
+                    placeholder="Full Name"
+                    placeholderTextColor="#acadad"
+                    style={styles.input}
+                />
                 <TextInput
                     onChangeText={text => setUsername(text)}
                     value={username}
                     placeholder="Username"
                     placeholderTextColor="#acadad"
-                    autoCapitalize="none"
                     style={styles.input}
                 />
                 <View style={styles.passwordContainer}>
@@ -54,44 +77,22 @@ const Login = () => {
                         right: 12.5
                     }} onPress={() => setPasswordShown(prev => !prev)} />
                 </View>
-                <View style={{
-                    width: '80%',
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                }}>
-                    <Pressable>
-                        <Text style={globalStyles.anchorColor}>
-                            Forgotten Password?
-                        </Text>
-                    </Pressable>
-                </View>
-
+                <TextInput
+                    onChangeText={text => setPasswordVerification(text)}
+                    value={passwordVerification}
+                    placeholder="Confirm Password"
+                    placeholderTextColor="#acadad"
+                    style={styles.input}
+                    secureTextEntry={!passwordShown}
+                />
                 <TouchableOpacity
-                    style={[styles.loginButton, { opacity: loggingIn ? 0.8 : 1 }]}
-                    disabled={loggingIn}
-                    onPress={tryLogin}
+                    style={styles.loginButton}
+                    onPress={trySignUp}
                 >
-                    {
-                        loggingIn ? (
-                            <ActivityIndicator color="white" size="small" />
-                        ) : (
-                            <Text style={{
-                                color: 'white',
-                                fontSize: 16
-                            }}>Log in</Text>
-                        )
-                    }
-                </TouchableOpacity>
-                <View style={styles.orContainer}>
-                    <View style={styles.orBar} />
-                    <View style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ color: 'white' }}>Or</Text>
-                    </View>
-                    <View style={styles.orBar} />
-                </View>
-                <TouchableOpacity style={styles.googleButtonContainer}>
-                    <AntDesign name="google" size={24} color="black" />
-                    <Text style={styles.googleText}>Sign in with Google</Text>
+                    <Text style={{
+                        color: 'white',
+                        fontSize: 15
+                    }}>Create Account</Text>
                 </TouchableOpacity>
             </View>
             <View style={[styles.section, {
@@ -103,17 +104,18 @@ const Login = () => {
                     <Text style={{
                         color: '#9fa2a1',
                         fontSize: 15,
-                    }}>Don't have an account?</Text>
+                    }}>Already have an account?</Text>
                     <Pressable onPress={() => {
-                        router.replace('/(auth)/signup');
+                        router.replace('/auth/login');
                     }}>
-                        <Text style={globalStyles.anchorColor}>Sign Up</Text>
+                        <Text style={globalStyles.anchorColor}>Log in</Text>
                     </Pressable>
                 </View>
             </View>
         </View >
     )
 }
+
 
 const styles = StyleSheet.create({
     parent: {
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         flexDirection: 'column',
-        flex: 9
+        flex: 1
     },
     title: {
         color: 'white',
@@ -202,9 +204,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 20,
+        gap: 15,
         flexDirection: 'column'
     }
 })
 
-export default Login;
+export default SignUp

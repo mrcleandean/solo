@@ -26,8 +26,8 @@ const Record = () => {
     const cameraReadyRef = useRef(false);
 
     useEffect(() => {
-        setTabActive(pathname === '/create');
-        if (pathname !== '/create') {
+        setTabActive(pathname === '/tabs/create');
+        if (pathname !== '/tabs/create') {
             setIsRecording(false);
             setPreviewProgress(0);
         }
@@ -88,7 +88,7 @@ const Record = () => {
     };
 
     const nextPressed = async () => {
-        router.push('/(tabs)/create/upload');
+        router.push('/tabs/create/upload');
     }
 
     if (!tabAcitve) return null;
