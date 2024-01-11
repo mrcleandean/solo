@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { View, Dimensions, StyleSheet } from 'react-native';
-import { Video, ResizeMode, type AVPlaybackSource } from 'expo-av';
+import { Dimensions, StyleSheet } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import { globalStyles } from '../constants';
 import { VideoDataType } from '../app/tabs';
 

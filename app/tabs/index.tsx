@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ViewToken } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler'
-import { type AVPlaybackSource } from 'expo-av';
 import { usePathname } from 'expo-router';
 import { Short } from '../../components';
 import { globalStyles } from '../../constants';
