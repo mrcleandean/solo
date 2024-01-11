@@ -10,6 +10,8 @@ import { router } from "expo-router";
 import { addObjectMetadata, convertLocalUriToBlob, hasMessageKey, uploadObject } from "../../../util";
 import { useUserContext } from "../../_layout";
 
+// COME BACK TO THIS LATER
+
 const Upload = () => {
     const videoRef = useRef<Video>(null);
     const { userAuth } = useUserContext();
@@ -40,19 +42,31 @@ const Upload = () => {
         Keyboard.dismiss();
         if (!image || !capturedVideo || userAuth === null || userAuth === 'initial') return;
         try {
+            console.log('1')
             const imageBlob = await convertLocalUriToBlob(image);
+            console.log('2')
             if (imageBlob instanceof TypeError) throw new Error('Could not convert image to blob');
-            const videoBlob = await convertLocalUriToBlob(capturedVideo.uri);
-            if (videoBlob instanceof TypeError) throw new Error('Could not convert video to blob');
+            console.log('3')
 
-            const imageUrl = await uploadObject(imageBlob, userAuth.uid);
-            const videoUrl = await uploadObject(videoBlob, userAuth.uid);
+            const videoBlob = await convertLocalUriToBlob(capturedVideo.uri);
+            console.log('4')
+            if (videoBlob instanceof TypeError) throw new Error('Could not convert video to blob');
+            console.log('5')
+
+            const imageUrl = await uploadObject(imageBlob, userAuth.uid, 'images');
+            console.log('6')
+            const videoUrl = await uploadObject(videoBlob, userAuth.uid, 'videos');
+            console.log('7')
 
             await addObjectMetadata(userAuth.uid, imageUrl, 'images');
-            await addObjectMetadata(userAuth.uid, videoUrl, 'videos');
+            console.log('8')
+            await addObjectMetadata(userAuth.uid, videoUrl, 'videos', { caption, durationMillis });
+            console.log('9')
 
             restoreDefaults();
+            console.log('10')
             router.replace('/tabs/profile');
+            console.log('11')
         } catch (e) {
             if (hasMessageKey(e)) console.log(e.message);
             else console.log('Unknown error in share()');

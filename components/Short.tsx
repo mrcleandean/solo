@@ -2,8 +2,9 @@ import { useEffect, useRef } from 'react';
 import { View, Dimensions, StyleSheet } from 'react-native';
 import { Video, ResizeMode, type AVPlaybackSource } from 'expo-av';
 import { globalStyles } from '../constants';
+import { VideoDataType } from '../app/tabs';
 
-const Short = ({ item, play, canPlay }: { item: AVPlaybackSource; play: boolean; canPlay: boolean; }) => {
+const Short = ({ item, play, canPlay }: { item: VideoDataType; play: boolean; canPlay: boolean; }) => {
     const video = useRef<Video | null>(null);
     useEffect(() => {
         if (play && canPlay) {
@@ -13,6 +14,7 @@ const Short = ({ item, play, canPlay }: { item: AVPlaybackSource; play: boolean;
             video.current?.setPositionAsync(0);
         }
     }, [play, canPlay]);
+
     return (
         <Video
             ref={video}
@@ -20,7 +22,7 @@ const Short = ({ item, play, canPlay }: { item: AVPlaybackSource; play: boolean;
                 width: Dimensions.get('window').width,
                 height: Dimensions.get('window').height - globalStyles.tabBar.height,
             }}
-            source={item}
+            source={{ uri: item.videoUrl }}
             resizeMode={ResizeMode.COVER}
             isLooping
         />

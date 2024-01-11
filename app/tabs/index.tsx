@@ -5,10 +5,22 @@ import { type AVPlaybackSource } from 'expo-av';
 import { usePathname } from 'expo-router';
 import { Short } from '../../components';
 import { globalStyles } from '../../constants';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { FIREBASE_DB } from '../../firebaseConfig';
+import { hasMessageKey } from '../../util';
+
+export type VideoDataType = {
+    docId: string,
+    caption: string,
+    durationMillis: number,
+    timestamp: Date,
+    userId: string,
+    videoUrl: string
+};
 
 const Feed = () => {
     const pathname = usePathname();
-    const [array, setArray] = useState<AVPlaybackSource[]>([]);
+    const [array, setArray] = useState<VideoDataType[]>([]);
 
     const [viewableItemIndex, setViewableItemIndex] = useState<number | null>(null);
     const [tabActive, setTabActive] = useState(false);
@@ -16,6 +28,24 @@ const Feed = () => {
         if (viewableItems.length > 0) {
             setViewableItemIndex(viewableItems[0].index);
         }
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const collectionRef = collection(FIREBASE_DB, 'videos');
+                const q = query(collectionRef, orderBy('timestamp', 'desc'), limit(7));
+                const querySnapshot = await getDocs(q);
+                const docs = querySnapshot.docs.map(doc => ({
+                    docId: doc.id,
+                    ...doc.data()
+                }));
+                setArray(docs as VideoDataType[]);
+            } catch (e) {
+                if (hasMessageKey(e)) console.log(e.message);
+                else console.log('An unknown error occured: Failed to fetch videos');
+            }
+        })();
     }, []);
 
     useEffect(() => {
