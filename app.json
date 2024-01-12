@@ -54,7 +54,8 @@
         {
           "microphonePermission": "Allow $(Solo) to access your microphone."
         }
-      ]
+      ],
+      "react-native-compressor"
     ],
     "experiments": {
       "typedRoutes": true

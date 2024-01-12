@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 import { router } from "expo-router";
 import { addObjectMetadata, convertLocalUriToBlob, hasMessageKey, uploadObject } from "../../../util";
 import { useUserContext } from "../../_layout";
+import { Video as VideoCompressor, Image as ImageCompressor } from "react-native-compressor";
 
 // COME BACK TO THIS LATER
 
@@ -42,31 +43,24 @@ const Upload = () => {
         Keyboard.dismiss();
         if (!image || !capturedVideo || userAuth === null || userAuth === 'initial') return;
         try {
-            console.log('1')
-            const imageBlob = await convertLocalUriToBlob(image);
-            console.log('2')
-            if (imageBlob instanceof TypeError) throw new Error('Could not convert image to blob');
-            console.log('3')
+            const imageUri = await ImageCompressor.compress(image);
+            const imageBlob = await convertLocalUriToBlob(imageUri);
 
-            const videoBlob = await convertLocalUriToBlob(capturedVideo.uri);
-            console.log('4')
+            if (imageBlob instanceof TypeError) throw new Error('Could not convert image to blob');
+
+            const videoUri = await VideoCompressor.compress(capturedVideo.uri);
+            const videoBlob = await convertLocalUriToBlob(videoUri);
+
             if (videoBlob instanceof TypeError) throw new Error('Could not convert video to blob');
-            console.log('5')
 
             const imageUrl = await uploadObject(imageBlob, userAuth.uid, 'images');
-            console.log('6')
             const videoUrl = await uploadObject(videoBlob, userAuth.uid, 'videos');
-            console.log('7')
 
             await addObjectMetadata(userAuth.uid, imageUrl, 'images');
-            console.log('8')
             await addObjectMetadata(userAuth.uid, videoUrl, 'videos', { caption, durationMillis });
-            console.log('9')
 
             restoreDefaults();
-            console.log('10')
             router.replace('/tabs/profile');
-            console.log('11')
         } catch (e) {
             if (hasMessageKey(e)) console.log(e.message);
             else console.log('Unknown error in share()');
