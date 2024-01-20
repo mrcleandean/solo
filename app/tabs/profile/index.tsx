@@ -1,17 +1,39 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { Feather, FontAwesome, Fontisto, AntDesign } from '@expo/vector-icons';
 import { globalStyles } from '../../../constants';
 import { useUserContext } from '../../_layout';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { FIREBASE_DB } from '../../../firebaseConfig';
+import { hasMessageKey } from '../../../util';
+import { Link } from 'expo-router';
 
 const Profile = () => {
     const { userAuth, userDoc } = useUserContext();
     if (userAuth === 'initial') return;
-
     const [gridActive, setGridActive] = useState<'posts' | 'list' | 'tags'>('posts');
+    const [userThumbnails, setUserThumbnails] = useState<string[]>([]);
     const isUsersProfile = userAuth?.email == userDoc?.email;
+    useEffect(() => {
+        (async () => {
+            try {
+                const collectionRef = collection(FIREBASE_DB, 'images');
+                const q = query(collectionRef, where('userId', '==', userAuth?.uid));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    console.log('No matching documents.');
+                    return;
+                }
+                const userThumbs = snapshot.docs.map(doc => doc.data().videoUrl as string);
+                setUserThumbnails(userThumbs);
+            } catch (e) {
+                if (hasMessageKey(e)) console.log(e.message);
+                else console.error('Error fetching documents: ', e);
+            }
+        })();
+    }, []);
     return (
         <View style={styles.parentWrapper}>
             <View style={styles.mainContent}>
@@ -51,10 +73,12 @@ const Profile = () => {
                 </View>
                 <View style={styles.bioWrapper}>
                     <Text style={styles.fullNameText}>{userDoc?.fullName || ''}</Text>
-                    <Text style={styles.bioText}>{userDoc?.bio || 'akjsdhfkjahsdfkj'}</Text>
+                    <Text style={styles.bioText}>{userDoc?.bio}</Text>
                     <View style={styles.editProfileWrapper}>
                         <Pressable style={styles.editProfileButton}>
-                            <Text style={styles.editProfileText}>Edit Profile</Text>
+                            <Link href="/tabs/profile/edit-profile-modal" style={styles.editProfileLink}>
+                                <Text style={styles.editProfileText}>Edit Profile</Text>
+                            </Link>
                         </Pressable>
                         <Pressable style={styles.miscButton}>
                             <Feather name='at-sign' size={16.5} color="black" />
@@ -73,8 +97,12 @@ const Profile = () => {
                             <AntDesign name="tags" size={30} color={gridActive === 'tags' ? globalStyles.anchorColor.color : 'white'} />
                         </Pressable>
                     </View>
-                    <ScrollView style={styles.postsWrapper}>
-
+                    <ScrollView contentContainerStyle={styles.postsWrapper}>
+                        {
+                            userThumbnails.map((thumbnail, i) => (
+                                <Image style={styles.thumbnail} key={i} source={{ uri: thumbnail }} />
+                            ))
+                        }
                     </ScrollView>
                 </View>
             </View>
@@ -159,14 +187,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 10
     },
+    editProfileLink: {
+        width: '100%',
+        display: 'flex',
+        padding: 7,
+        textAlign: 'center'
+    },
     editProfileButton: {
         backgroundColor: 'white',
         width: '100%',
         flex: 1,
-        padding: 7,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         borderRadius: 7.5,
     },
     editProfileText: {
@@ -215,10 +245,16 @@ const styles = StyleSheet.create({
         padding: 2,
     },
     postsWrapper: {
-        width: '100%',
+        width: Dimensions.get('window').width,
         marginTop: 15,
         flex: 1,
-        backgroundColor: 'white'
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    thumbnail: {
+        width: Dimensions.get('window').width / 3,
+        height: '50%',
     }
 })
 

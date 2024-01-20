@@ -18,7 +18,12 @@ const globalStyles = StyleSheet.create({
         color: '#1c79b7'
     },
     summission: {
-        backgroundColor: '#0797ff'
+        backgroundColor: '#0797ff',
+        color: '#0797ff'
+    },
+    danger: {
+        backgroundColor: '#FF3131',
+        color: '#FF3131'
     }
 })
 

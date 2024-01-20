@@ -7,6 +7,11 @@ const ProfileLayout = () => {
         }}>
             <Stack.Screen name='index' />
             <Stack.Screen name='settings' />
+            <Stack.Screen name='edit-profile-modal' options={{
+                presentation: 'modal',
+                headerShown: true,
+                headerTitle: 'Edit Profile'
+            }} />
         </Stack>
     )
 }
